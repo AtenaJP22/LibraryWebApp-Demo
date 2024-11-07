@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Borrowed Books</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .book-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .book-cover {
+            width: 100px;
+            height: auto;
+            margin-right: 20px;
+        }
+        .book-details {
+            flex-grow: 1;
+        }
+        .borrowed-book-details {
+            color: grey;
+        }
+        .btn {
+            margin: 20px 0;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn:hover {
+            background-color: #45A049;
+        }
+        .due-date-input {
+            margin-top: 10px;
+        }
+        .return-button {
+            margin-top: 10px;
+        }
+        .error-message {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Borrowed Books</h1>
+        <ul id="borrowedList">
+            <li th:each="borrowedBook : ${borrowedBooks}" class="book-container">
+                <img th:src="${borrowedBook.coverImageUrl}" alt="Book Cover" class="book-cover">
+                <div class="book-details">
+                    <strong>Title:</strong> <span th:text="${borrowedBook.title}"></span><br>
+                    <strong>Author:</strong> <span th:text="${borrowedBook.author}"></span><br>
+                    <strong>ISBN:</strong> <span th:text="${borrowedBook.isbn}"></span><br>
+                    <strong>Genre:</strong> <span th:text="${borrowedBook.genre}"></span><br>
+                    <strong>Borrowed Date:</strong> <span th:text="${borrowedBook.borrowedDate}"></span><br>
+                    
+                    <!-- Pass borrowed date as a hidden span -->
+                    <span class="borrowed-date" style="display: none;" th:text="${borrowedBook.borrowedDate}"></span>
+                    <!-- Use book ID directly -->
+                    <input type="date" class="due-date-input" id="dueDate_${borrowedBook.id}" value="${borrowedBook.dueDate}">
+                    <button onclick="updateDueDate('${borrowedBook.id}')">Update Due Date</button>
+                    
+                    <div class="error-message" id="error_${borrowedBook.id}" style="display: none;">Due date must be after the borrow date!</div>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <button class="btn" id="backButton">Back to User Page</button>
+    <button class="btn" id="backMainButton">Back to Main Page</button>
+
+    <script>
+        document.getElementById("backButton").addEventListener("click", function() {
+            window.location.href = "/user"; // Redirect to the user page
+        });
+
+        document.getElementById("backMainButton").addEventListener("click", function() {
+            window.location.href = "/"; // Redirect to the main page
+        });
+
+        function updateDueDate(bookId) {
+            var dueDateInput = document.getElementById("dueDate_" + bookId);
+            var borrowDate = new Date(document.querySelector("#borrowedList #dueDate_" + bookId).previousElementSibling.textContent);
+            var dueDate = new Date(dueDateInput.value);
+            
+            if (dueDate <= borrowDate) {
+                document.getElementById("error_" + bookId).style.display = "block";
+            } else {
+                // Proceed with updating the due date
+                document.getElementById("error_" + bookId).style.display = "none";
+                console.log("New Due Date for Book ID " + bookId + ": " + dueDateInput.value);
+                // Example AJAX request:
+                fetch("/api/updateDueDate?bookId=" + bookId + "&dueDate=" + dueDateInput.value, {
+                     method: "PUT"
+                 })
+                 .then(response => response.json())
+                 .then(data => {
+                     console.log(data);
+                 })
+                 .catch(error => {
+                     console.error("Error updating due date:", error);
+                 });
+            }
+        }
+
+        
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Library Web System</title>
+    <link rel="stylesheet" th:href="@{style.css}">
+</head>
+<body>
+
+<img class="background-image" src="/images/large.png" alt="Background Image">
+
+<div class="container">
+    <h1>Welcome to the Library!</h1>
+    <p class="description">Borrow books, manage your account, and explore new titles!</p>
+</div>
+
+<div class="container">
+    <h1>Are you an admin or a user?</h1>
+    <p class="description">An admin can add new books, edit or delete the existing books besides viewing and searching among them.</p>
+	
+	<p class="description">A user can view the existing books, search for a specific book and borrow books for a limited time interval.</p>
+    <button class="btn" id="adminButton"><i class="animation"></i>I'm an admin.<i class="animation"></i>
+    </button>
+
+	<button class="btn" id="userButton"><i class="animation"></i>I'm a user.<i class="animation"></i>
+	    </button>
+</div>
+
+<script>
+    document.getElementById("adminButton").addEventListener("click", function() {
+        window.location.href = "/admin"; // Redirect to the admin page
+    });
+
+    document.getElementById("userButton").addEventListener("click", function() {
+        window.location.href = "/user"; // Redirect to the user page
+    });
+</script>
+
+</body>
+</html>
+
+

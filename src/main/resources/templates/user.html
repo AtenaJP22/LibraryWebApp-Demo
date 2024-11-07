@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Page</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="search.css">
+    <style>
+        .book-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .book-cover {
+            width: 100px;
+            height: auto;
+            margin-right: 20px;
+        }
+        .book-details {
+            flex-grow: 1;
+        }
+        .borrow-button, .borrowed-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .borrow-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .borrow-button:hover {
+            background-color: #45A049;
+        }
+        .borrowed-button {
+            background-color: grey;
+            color: white;
+            cursor: not-allowed;
+        }
+        .btn {
+            margin: 20px 0;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const bookList = document.getElementById("bookList");
+
+            let allBooks = [];
+            let borrowedBookIds = [];
+
+            function fetchAndDisplayBooks() {
+                Promise.all([
+                    fetch("/api/books").then(response => response.json()),
+                    fetch("/api/loans/borrowed").then(response => response.json())
+                ]).then(([books, borrowedIds]) => {
+                    allBooks = books;
+                    borrowedBookIds = borrowedIds;
+                    displayBooks(books);
+                }).catch(error => console.error("Error fetching books:", error));
+            }
+
+            function displayBooks(books) {
+                bookList.innerHTML = ""; // Clear previous book list
+                books.forEach(book => {
+                    const listItem = document.createElement("li");
+
+                    const bookContainer = document.createElement("div");
+                    bookContainer.className = "book-container";
+
+                    const bookCover = document.createElement("img");
+                    bookCover.src = book.coverImageUrl;
+                    bookCover.alt = `${book.title} cover`;
+                    bookCover.className = "book-cover";
+
+                    const bookDetails = document.createElement("div");
+                    bookDetails.className = "book-details";
+                    bookDetails.innerHTML = `<strong>Title:</strong> ${book.title}<br>
+                                             <strong>Author:</strong> ${book.author}<br>
+                                             <strong>ISBN:</strong> ${book.isbn}<br>
+                                             <strong>Genre:</strong> ${book.genre}<br>
+											 <strong>Publish Year:</strong> ${book.publish_year}`;
+
+                    const borrowButton = document.createElement("button");
+                    borrowButton.textContent = "Borrow";
+                    borrowButton.className = "borrow-button";
+
+                    if (borrowedBookIds.includes(book.id)) {
+                        borrowButton.textContent = "Borrowed";
+                        borrowButton.classList.add("borrowed-button");
+                        borrowButton.disabled = true;
+                    } else {
+                        borrowButton.addEventListener("click", function() {
+                            const currentDate = new Date().toISOString().split('T')[0];
+                            const dueDate = new Date();
+                            dueDate.setDate(dueDate.getDate() + 14);
+                            const dueDateString = dueDate.toISOString().split('T')[0];
+
+                            fetch("/api/loans/borrow", {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    bookId: book.id,
+                                    borrowedDate: currentDate,
+                                    dueDate: dueDateString
+                                })
+                            })
+                            .then(response => response.text())
+                            .then(data => {
+                                alert(`You have borrowed "${book.title}"`);
+                                fetchAndDisplayBooks(); // Refresh the book list
+                            })
+                            .catch(error => console.error("Error borrowing book:", error));
+                        });
+                    }
+
+                    bookContainer.appendChild(bookCover);
+                    bookContainer.appendChild(bookDetails);
+                    bookContainer.appendChild(borrowButton);
+                    listItem.appendChild(bookContainer);
+                    bookList.appendChild(listItem);
+                });
+            }
+
+            function searchBooks(query) {
+                const filteredBooks = allBooks.filter(book => book.title.toLowerCase().includes(query.toLowerCase()));
+                displayBooks(filteredBooks);
+            }
+
+            fetchAndDisplayBooks();
+
+            const searchInput = document.getElementById("searchInput");
+            searchInput.addEventListener("input", function() {
+                const query = searchInput.value;
+                searchBooks(query);
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the User Page!</h1>
+        <p class="description">Here you can view and search for books, and manage your borrowed books.</p>
+
+        <div class="group">
+            <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+                <g>
+                    <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path>
+                </g>
+            </svg>
+            <input id="searchInput" placeholder="Search book by title" type="search" class="input">
+        </div>
+
+		<button class="btn" id="borrowedBooksButton">View Borrowed Books</button>
+    </div> 
+
+    <button class="btn" id="backButton">Back to the Main Page</button>
+    
+    <script>
+        document.getElementById("backButton").addEventListener("click", function() {
+            window.location.href = "/"; // Redirect to the main page
+			
+        })
+		
+		document.getElementById("borrowedBooksButton").addEventListener("click", function() {
+		            window.location.href = "/showBorrow"; // Redirect to the borrowed books page
+					
+		        })
+    </script>
+
+    <div class="container">
+        <h1>Available Books:</h1>
+        <ul id="bookList"></ul>
+    </div>
+</body>
+</html>
+
+
+
+
+

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Book</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelector("form").addEventListener("submit", function(event) {
+                event.preventDefault();
+                const book = {
+                    title: document.querySelector("input[placeholder='Enter the title of the book']").value,
+                    author: document.querySelector("input[placeholder='Enter the author name']").value,
+                    isbn: document.querySelector("input[placeholder='Enter the ISBN']").value,
+                    genre: document.querySelector("input[placeholder='Enter the genre']").value,
+                    coverImageUrl: document.querySelector("input[placeholder='Enter the cover image URL']").value,
+					publish_year: document.querySelector("input[placeholder='Enter the year the book was published']").value
+                };
+                
+                fetch("/api/books/add", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(book)
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Book added successfully');
+                        window.location.href = "/admin"; // Redirect to the admin page
+                    } else {
+                        alert('Failed to add book');
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Add a New Book to the Library</h1>
+        <p class="description">Please fill in the form below with the information of the book you would like to add.</p>
+        <form class="form">
+            <input placeholder="Enter the title of the book" class="input" type="text" required>
+            <input placeholder="Enter the author name" class="input" type="text" required>
+            <input placeholder="Enter the ISBN" class="input" type="text" required>
+            <input placeholder="Enter the genre" class="input" type="text">
+            <input placeholder="Enter the cover image URL" class="input" type="text">
+			<input placeholder="Enter the year the book was published" class="input" type="number" min="1900" max="2024" required>
+
+            <button>Submit</button>
+        </form>
+    </div>
+	</div>
+		<!-- Add the Back to Main Page button -->
+		   <button class="btn" id="backButton">Back to the Main Page</button>
+		   <p></p>
+		   <!-- Add the Back to Admin Page button -->
+		   	    <button class="btn" id="AdminButton">Back to the Admin Page</button>
+		
+		   <script>
+		       document.getElementById("backButton").addEventListener("click", function() {
+		           window.location.href = "/"; // Redirect to the main page
+		       });
+			   document.getElementById("AdminButton").addEventListener("click", function() {
+			   		            window.location.href = "/admin"; // Redirect to the add page
+							});
+		   </script>
+</body>
+</html>
+

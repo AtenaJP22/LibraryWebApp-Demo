@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Book</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookId = urlParams.get('id');
+
+            fetch(`/api/books/${bookId}`)
+                .then(response => response.json())
+                .then(book => {
+                    document.getElementById("title").value = book.title;
+                    document.getElementById("author").value = book.author;
+                    document.getElementById("isbn").value = book.isbn;
+                    document.getElementById("genre").value = book.genre;
+                    document.getElementById("coverImageUrl").value = book.coverImageUrl;
+					document.getElementById("publish_year").value = book.pubish_year;
+                });
+
+            document.getElementById("editBookForm").addEventListener("submit", function(event) {
+                event.preventDefault();
+                const updatedBook = {
+                    title: document.getElementById("title").value,
+                    author: document.getElementById("author").value,
+                    isbn: document.getElementById("isbn").value,
+                    genre: document.getElementById("genre").value,
+                    coverImageUrl: document.getElementById("coverImageUrl").value,
+					publish_year: document.getElementById("publish_year").value
+                };
+
+                fetch(`/api/books/edit/${bookId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedBook)
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Book updated successfully');
+                        window.location.href = "/admin"; // Redirect to the admin page
+                    } else {
+                        alert('Failed to update book');
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Edit Book</h1>
+        <p class="description">Edit the details of the book below and click Submit to save changes.</p>
+        <form id="editBookForm">
+            <input id="title" placeholder="Enter the title of the book" class="input" type="text">
+            <input id="author" placeholder="Enter the author name" class="input" type="text">
+            <input id="isbn" placeholder="Enter the ISBN" class="input" type="text">
+            <input id="genre" placeholder="Enter the genre" class="input" type="text">
+            <input id="coverImageUrl" placeholder="Enter the cover image URL" class="input" type="text">
+			<input id="publish_year" placeholder="Enter the published year" class="input" type="number">
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+	<!-- Add the Back to Main Page button -->
+			   <button class="btn" id="backButton">Back to the Main Page</button>
+			   <p></p>
+			   <!-- Add the Back to Admin Page button -->
+			   	    <button class="btn" id="AdminButton">Back to the Admin Page</button>
+					<script>
+							       document.getElementById("backButton").addEventListener("click", function() {
+							           window.location.href = "/"; // Redirect to the main page
+							       });
+								   document.getElementById("AdminButton").addEventListener("click", function() {
+								   		            window.location.href = "/admin"; // Redirect to the add page
+												});
+					</script>
+</body>
+</html>
+
+
